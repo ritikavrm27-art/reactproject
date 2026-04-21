@@ -1,0 +1,56 @@
+
+
+services:
+  blog-service:
+    build: ./Golen_Blogs
+    ports:
+      - "8001:8001"
+    depends_on:
+      - blog-db
+    environment:
+      - DB_HOST=blog-db
+      - DB_PORT=5432
+      - DB_USER=postgres
+      - DB_PASSWORD=postgres
+      - DB_NAME=blogs_golen
+
+  user-service:
+    build: ./Golen_Users
+    ports:
+      - "8002:8002"
+    depends_on:
+      - user-db
+    environment:
+      - DB_HOST=user-db
+      - DB_PORT=5432
+      - DB_USER=postgres
+      - DB_PASSWORD=postgres
+      - DB_NAME=users_golen
+
+  frontend:
+    build: ./myfirstblog
+    ports:
+      - "3000:3000"
+    depends_on:
+      - user-service
+      - blog-service
+
+  user-db:
+    image: postgres:15
+    restart: always
+    environment:
+      POSTGRES_DB: users_golen
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5433:5432"
+
+  blog-db:
+    image: postgres:15
+    restart: always
+    environment:
+      POSTGRES_DB: blogs_golen
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5434:5432"
