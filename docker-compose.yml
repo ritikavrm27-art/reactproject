@@ -37,19 +37,19 @@ services:
       - blog-service
 
   user-db:
-  image: postgres:15
-  restart: always
-  environment:
-    POSTGRES_DB: users_golen
-    POSTGRES_USER: postgres
-    POSTGRES_PASSWORD: postgres
-  ports:
-    - "5433:5432"
-  healthcheck:
-    test: ["CMD-SHELL", "pg_isready -U postgres"]
-    interval: 5s
-    timeout: 5s
-    retries: 5
+    image: postgres:15
+    restart: always
+    environment:
+      POSTGRES_DB: users_golen
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5433:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   blog-db:
     image: postgres:15
