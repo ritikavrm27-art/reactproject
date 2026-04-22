@@ -15,19 +15,25 @@ func ConnectDB() {
 	connString := "postgres://postgres:postgres@blog-db:5432/blogs_golen?sslmode=disable"
 
 	var err error
-	DB, err = sql.Open("postgres", connString)
 
-	if err != nil {
-		log.Fatal(err)
+	// Retry logic
+	for i := 0; i < 10; i++ {
+		DB, err = sql.Open("postgres", connString)
+		if err != nil {
+			log.Println("Error opening DB:", err)
+		} else {
+			err = DB.Ping()
+			if err == nil {
+				log.Println("PostgreSQL Database Connected")
+				return
+			}
+			log.Println("DB not ready yet, retrying...")
+		}
+
+		time.Sleep(2 * time.Second)
 	}
 
-	err = DB.Ping()
-
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	log.Println("PostgreSQL Database Connected")
+	log.Fatal("Could not connect to DB after multiple attempts")
 }
 func GetDB() *sql.DB {
 	return DB
