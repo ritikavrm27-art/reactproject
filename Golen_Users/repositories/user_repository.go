@@ -33,3 +33,23 @@ func GetUsers() ([]models.User, error) {
 
 	return users, nil
 }
+func GetUserByUsername(username string) (*models.User, error) {
+	var user models.User
+
+	query := `SELECT id, uname, uemail, upassword 
+	          FROM public.tusers 
+	          WHERE uname=$1`
+
+	err := config.DB.QueryRow(query, username).Scan(
+		&user.ID,
+		&user.Name,
+		&user.Email,
+		&user.Password,
+	)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &user, nil
+}

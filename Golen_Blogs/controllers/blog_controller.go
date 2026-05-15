@@ -3,13 +3,17 @@ package controllers
 import (
 	"encoding/json"
 	"net/http"
+	"io"
+	"fmt"
+	"os"
+	"time"
 
 	"blogapi/services"
 	"blogapi/models"
 )
 func enableCors(w *http.ResponseWriter) {
 	(*w).Header().Set("Access-Control-Allow-Origin", "*")
-	(*w).Header().Set("Access-Control-Allow-Headers", "Content-Type")
+	(*w).Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
 	(*w).Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
 }
 
@@ -17,6 +21,7 @@ func GetBlogs(w http.ResponseWriter, r *http.Request) {
 	enableCors(&w)
 
 	if r.Method == "OPTIONS" {
+		w.WriteHeader(http.StatusOK)
 		return
 	}
 
@@ -33,6 +38,7 @@ func CreateBlog(w http.ResponseWriter, r *http.Request) {
 	enableCors(&w)
 
 	if r.Method == "OPTIONS" {
+		w.WriteHeader(http.StatusOK)
 		return
 	}
 	
@@ -79,4 +85,44 @@ func DeleteBlog(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(map[string]string{
 		"message": "Blog deleted successfully",
 	})
+
+}
+func UploadFile(w http.ResponseWriter, r *http.Request) {
+
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+
+	if r.Method == "OPTIONS" {
+		w.WriteHeader(http.StatusOK)
+		return
+	}
+
+	r.ParseMultipartForm(10 << 20)
+
+	file, handler, err := r.FormFile("file")
+	if err != nil {
+		http.Error(w, "File error", http.StatusBadRequest)
+		return
+	}
+	defer file.Close()
+
+	os.MkdirAll("/app/uploads", os.ModePerm)
+
+	// unique filename
+	filename := fmt.Sprintf("%d_%s", time.Now().Unix(), handler.Filename)
+
+	dst, err := os.Create("/app/uploads/" + filename)
+	if err != nil {
+		http.Error(w, "Save error", http.StatusInternalServerError)
+		return
+	}
+	defer dst.Close()
+
+	io.Copy(dst, file)
+
+	// return URL
+	response := map[string]string{
+		"url": "http://localhost:30001/files/" + filename,
+	}
+
+	json.NewEncoder(w).Encode(response)
 }

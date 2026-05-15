@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
 function CreateBlog() {
+  const navigate = useNavigate();
+
   const [formData, setFormData] = useState({
     title: "",
     content: "",
@@ -11,13 +14,19 @@ function CreateBlog() {
 
   // Fetch blogs
   const fetchBlogs = async () => {
-    const res = await fetch("http://localhost:8001/blogs");
+    const res = await fetch("http://localhost:30001/blogs");
     const data = await res.json();
     setBlogs(data);
   };
 
   useEffect(() => {
-    fetchBlogs();
+    const isLoggedIn = localStorage.getItem("isLoggedIn");
+
+    if (!isLoggedIn) {
+      navigate("/login");   // 🔥 redirect if not logged in
+    } else {
+      fetchBlogs();
+    }
   }, []);
 
   // Handle input
@@ -32,7 +41,7 @@ function CreateBlog() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    await fetch("http://localhost:8001/blog/create", {
+    await fetch("http://localhost:30001/blog/create", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"

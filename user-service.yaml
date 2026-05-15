@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: user-service
+  namespace: blog-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: user-service
+  template:
+    metadata:
+      labels:
+        app: user-service
+    spec:
+      containers:
+      - name: user-service
+        image: ritiverma/reactproject-user-service:latest
+        ports:
+        - containerPort: 8002
+        env:
+        - name: DB_HOST
+          value: user-db
+        - name: DB_PORT
+          value: "5432"
+        - name: DB_USER
+          value: postgres
+        - name: DB_PASSWORD
+          value: postgres
+        - name: DB_NAME
+          value: users_golen
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: user-service
+  namespace: blog-app
+spec:
+  type: NodePort
+  selector:
+    app: user-service
+  ports:
+    - port: 8002
+      targetPort: 8002
+      nodePort: 30002

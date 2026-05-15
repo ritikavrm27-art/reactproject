@@ -2,10 +2,13 @@ FROM golang:1.26
 
 WORKDIR /app
 
-# Copy go mod files first (important for caching)
-COPY go.mod go.sum ./
+# 🔥 Fix network issue
+ENV GOPROXY=https://goproxy.cn,direct
+ENV GOSUMDB=off
 
-RUN go mod tidy
+# Copy go files first (cache optimization)
+COPY go.mod go.sum ./
+RUN go mod download
 
 # Copy rest of the code
 COPY . .
